@@ -25,6 +25,7 @@ if not st.session_state.authenticated:
         # Access secrets correctly
         if password in st.secrets["RECRUITER_KEYS"]:
             st.session_state.authenticated = True
+            st.session_state.access_code = password
             st.success("Access Granted! Loading chat...")
             st.rerun()
         else:
@@ -53,7 +54,8 @@ if prompt := st.chat_input("Ask about my projects..."):
                 st.secrets["N8N_WEBHOOK_URL"],
                 json={
                     "text": prompt,
-                    "sessionId": st.session_state.session_id
+                    "sessionId": st.session_state.session_id,
+                    "accessCode": st.session_state.get("access_code", "unknown")
                 }
             )
             
