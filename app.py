@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import uuid
 
 # 1. Page Configuration
 st.set_page_config(page_title="Suat's AI Assistant", page_icon="🤖")
@@ -8,6 +9,10 @@ st.title("🤖 Chat with Suat's AI Assistant")
 # 2. Simple Authentication System
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
+
+# Initialize Session ID
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())
 
 if not st.session_state.authenticated:
     st.markdown("### 🔒 Access Required")
@@ -46,7 +51,10 @@ if prompt := st.chat_input("Ask about my projects..."):
             # Call n8n
             response = requests.post(
                 st.secrets["N8N_WEBHOOK_URL"],
-                json={"text": prompt}
+                json={
+                    "text": prompt,
+                    "sessionId": st.session_state.session_id
+                }
             )
             
             if response.status_code == 200:
