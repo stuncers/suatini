@@ -1,2 +1,5 @@
 streamlit
 requests
+pinecone
+openai
+python-docx
