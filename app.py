@@ -38,25 +38,28 @@ if "messages" not in st.session_state:
         {"role": "assistant", "content": "Hello! I'm Suat's AI assistant. Ask me anything about his experience."}
     ]
 
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-if prompt := st.chat_input("Ask about my projects..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
+def handle_chat(user_prompt):
+    """Handles sending the user prompt to n8n and updating the chat history."""
+    st.session_state.messages.append({"role": "user", "content": user_prompt})
     with st.chat_message("user"):
-        st.markdown(prompt)
+        st.markdown(user_prompt)
 
     with st.spinner("Thinking..."):
         try:
+            # Prepare payload
+            payload = {
+                "text": user_prompt,
+                "sessionId": st.session_state.session_id,
+                "accessCode": st.session_state.get("access_code", "unknown")
+            }
+            
+            # Debug: Print payload to terminal
+            print(f"Sending payload to n8n: {payload}")
+
             # Call n8n
             response = requests.post(
                 st.secrets["N8N_WEBHOOK_URL"],
-                json={
-                    "text": prompt,
-                    "sessionId": st.session_state.session_id,
-                    "accessCode": st.session_state.get("access_code", "unknown")
-                }
+                json=payload
             )
             
             if response.status_code == 200:
@@ -71,3 +74,72 @@ if prompt := st.chat_input("Ask about my projects..."):
     with st.chat_message("assistant"):
         st.markdown(bot_answer)
     st.session_state.messages.append({"role": "assistant", "content": bot_answer})
+    
+    # Force a rerun to update the UI immediately (hides buttons, shows new history)
+    st.rerun()
+
+# Display Chat History
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+# Suggested Questions
+# Only show if no conversation has started yet (len == 1 means just the assistant greeting)
+if len(st.session_state.messages) == 1:
+    # Custom CSS for minimalist buttons and positioning
+    st.markdown("""
+        <style>
+        /* Style the buttons to be pill-shaped and minimalist */
+        div.stButton > button {
+            border-radius: 20px;
+            border: 1px solid #4b4b4b;
+            background-color: transparent;
+            color: #e0e0e0;
+            font-size: 0.01rem;
+            padding: 0.2rem 0rem;
+            transition: all 0.3s ease;
+        }
+        
+        div.stButton > button:hover {
+            border-color: #ff4b4b;
+            color: #ff4b4b;
+            background-color: rgba(255, 75, 75, 0.1);
+        }
+
+        /* Position the container at the bottom, just above the chat input */
+        /* We target the last horizontal block in the main container */
+        div[data-testid="stHorizontalBlock"]:last-of-type {
+            position: fixed;
+            bottom: 115px; /* Adjust based on chat input height */
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+            max-width: 700px; /* Match Streamlit's main column width */
+            z-index: 99;
+            padding: 1 1rem;
+            background: transparent;
+        }
+        
+        /* Hide the element decoration/border if any */
+        div[data-testid="stHorizontalBlock"]:last-of-type > div {
+            align-items: center;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    questions = [
+        "What is your experience with Python?",
+        "How can I contact you?",
+        "Tell me about your data science projects."
+    ]
+    
+    # Use columns to center the buttons and make them smaller
+    # Using 3 columns for 3 questions
+    cols = st.columns(3)
+    for i, question in enumerate(questions):
+        if cols[i].button(question, use_container_width=True): # Use container width to fill the small columns evenly
+            handle_chat(question)
+
+# Chat Input
+if prompt := st.chat_input("Ask about my projects..."):
+    handle_chat(prompt)
