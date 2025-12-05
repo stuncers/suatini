@@ -17,7 +17,7 @@ if "session_id" not in st.session_state:
 if not st.session_state.authenticated:
     st.markdown("### 🔒 Access Required")
     st.write("Please enter the access code provided to you.")
-    st.write("Reach out to s.tuncersuat@gmail.com for access code.")
+    st.write("Reach out to s.tuncersuat@gmail.com or https://www.linkedin.com/in/suat-tuncer for access code.")
     
     password = st.text_input("Access Code", type="password")
     
