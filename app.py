@@ -10,7 +10,7 @@ st.title("🤖 Chat with Suat's AI Assistant")
 # Sidebar
 with st.sidebar:
     st.header("Connect with Me")
-    st.link_button("📅 Book a Call", "https://calendly.com/s-tuncersuat/15min") # Update with your actual Calendly URL
+    st.link_button("📅 Book a Call", "https://calendly.com/s-tuncersuat/15min")
 
 # 2. Simple Authentication System
 if "authenticated" not in st.session_state:
@@ -27,7 +27,7 @@ if not st.session_state.authenticated:
     
     *If you are a recruiter or hiring manager, please enter your access code below.*
     
-    *Need a code? Reach out to s.tuncersuat@gmail.com or [LinkedIn](https://www.linkedin.com/in/suat-tuncer).*
+    *Need a code? Reach out to **s.tuncersuat@gmail.com** or [LinkedIn](https://www.linkedin.com/in/suat-tuncer).*
     """)
 
     # Custom CSS to hide the "Press Enter to submit" instruction
@@ -106,52 +106,91 @@ def handle_chat(user_prompt):
     # Force a rerun to update the UI immediately (hides buttons, shows new history)
     st.rerun()
 
-# Display Chat History
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+# --- TABS ---
+tab_chat, tab_arch = st.tabs(["💬 Chat", "🛠️ Architecture"])
 
-# Suggested Questions
-# Only show if no conversation has started yet (len == 1 means just the assistant greeting)
-if len(st.session_state.messages) == 1:
-    # Custom CSS for minimalist buttons and positioning
-    st.markdown("""
-        <style>
-        /* Style the buttons to be pill-shaped and minimalist */
-        div.stButton > button {
-            border-radius: 20px;
-            border: 1px solid #4b4b4b;
-            background-color: transparent;
-            color: #e0e0e0;
-            font-size: 0.8rem;
-            padding: 0.5rem 1rem;
-            transition: all 0.3s ease;
-        }
+with tab_chat:
+    # Display Chat History
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    # Suggested Questions
+    # Only show if no conversation has started yet (len == 1 means just the assistant greeting)
+    if len(st.session_state.messages) == 1:
+        # Custom CSS for minimalist buttons
+        st.markdown("""
+            <style>
+            /* Style the buttons to be pill-shaped and minimalist */
+            div.stButton > button {
+                border-radius: 20px;
+                border: 1px solid #4b4b4b;
+                background-color: transparent;
+                color: #e0e0e0;
+                font-size: 0.8rem;
+                padding: 0.5rem 1rem;
+                transition: all 0.3s ease;
+            }
+            
+            div.stButton > button:hover {
+                border-color: #ff4b4b;
+                color: #ff4b4b;
+                background-color: rgba(255, 75, 75, 0.1);
+            }
+            </style>
+        """, unsafe_allow_html=True)
+
+        # Spacer to push buttons to the bottom-ish of the screen
+        st.markdown("<div style='height: 30vh;'></div>", unsafe_allow_html=True)
+
+        questions = [
+            "What is your experience with Python?",
+            "How can I contact you?",
+            "Tell me about your data science projects."
+        ]
         
-        div.stButton > button:hover {
-            border-color: #ff4b4b;
-            color: #ff4b4b;
-            background-color: rgba(255, 75, 75, 0.1);
-        }
-        </style>
-    """, unsafe_allow_html=True)
+        # Use columns to center the buttons and make them smaller
+        # Using 3 columns for 3 questions
+        cols = st.columns(3)
+        for i, question in enumerate(questions):
+            if cols[i].button(question, use_container_width=True): # Use container width to fill the small columns evenly
+                handle_chat(question)
 
-    # Spacer to push buttons to the bottom-ish of the screen
-    st.markdown("<div style='height: 30vh;'></div>", unsafe_allow_html=True)
+    # Chat Input
+    if prompt := st.chat_input("Ask about my projects..."):
+        handle_chat(prompt)
 
-    questions = [
-        "What is your experience with Python?",
-        "How can I contact you?",
-        "Tell me about your data science projects."
-    ]
+with tab_arch:
+    st.header("System Architecture")
+    st.markdown("This agent uses a **RAG (Retrieval-Augmented Generation)** pipeline to answer questions based on my resume and portfolio.")
     
-    # Use columns to center the buttons and make them smaller
-    # Using 3 columns for 3 questions
-    cols = st.columns(3)
-    for i, question in enumerate(questions):
-        if cols[i].button(question, use_container_width=True): # Use container width to fill the small columns evenly
-            handle_chat(question)
-
-# Chat Input
-if prompt := st.chat_input("Ask about my projects..."):
-    handle_chat(prompt)
+    st.graphviz_chart("""
+    digraph G {
+        rankdir=LR;
+        node [shape=box, style=filled, fillcolor=lightblue, fontname="Arial"];
+        
+        User [shape=ellipse, fillcolor=lightgrey];
+        Streamlit [label="Streamlit App\n(Frontend)"];
+        n8n [label="n8n Workflow\n(Orchestrator)", fillcolor=orange];
+        Pinecone [label="Pinecone\n(Vector DB)", fillcolor=lightgreen];
+        OpenAI [label="OpenAI GPT-4o\n(LLM)", fillcolor=lightyellow];
+        GoogleSheets [label="Google Sheets\n(Analytics & Logging)", fillcolor=lightpink];
+        
+        User -> Streamlit [label="Asks Question"];
+        Streamlit -> n8n [label="Webhook (JSON)"];
+        n8n -> Pinecone [label="Semantic Search"];
+        Pinecone -> n8n [label="Retrieved Context"];
+        n8n -> OpenAI [label="Prompt + Context"];
+        OpenAI -> n8n [label="Answer"];
+        n8n -> Streamlit [label="Response"];
+        n8n -> GoogleSheets [label="Log Chat", style=dashed];
+    }
+    """)
+    
+    st.info("""
+    **How it works:**
+    1. **Ingestion**: My resume and project files are embedded and stored in **Pinecone**.
+    2. **Retrieval**: When you ask a question, **n8n** searches Pinecone for relevant chunks of text.
+    3. **Generation**: The retrieved text + your question are sent to **GPT-4o** to generate an accurate answer.
+    4. **Analytics**: Every interaction is logged to **Google Sheets** for quality monitoring.
+    """)
