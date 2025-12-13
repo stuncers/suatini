@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import uuid
+import time
 
 # 1. Page Configuration
 st.set_page_config(page_title="Suat's AI Assistant", page_icon="🤖")
@@ -15,10 +16,24 @@ if "session_id" not in st.session_state:
     st.session_state.session_id = str(uuid.uuid4())
 
 if not st.session_state.authenticated:
-    st.markdown("### 🔒 Access Required")
-    st.write("Please enter the access code provided to you.")
-    st.write("Reach out to s.tuncersuat@gmail.com or https://www.linkedin.com/in/suat-tuncer for access code.")
+    st.markdown("""
+    Welcome! I am an AI agent trained on Suat's professional background. 
+    I can answer questions about his **resume, technical skills, and projects**.
     
+    *If you are a recruiter or hiring manager, please enter your access code below.*
+    
+    *Need a code? Reach out to s.tuncersuat@gmail.com or [LinkedIn](https://www.linkedin.com/in/suat-tuncer).*
+    """)
+
+    # Custom CSS to hide the "Press Enter to submit" instruction
+    st.markdown("""
+        <style>
+        div[data-testid="InputInstructions"] > span:nth-child(1) {
+            visibility: hidden;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
     with st.form("auth_form"):
         password = st.text_input("Access Code", type="password")
         submitted = st.form_submit_button("Enter")
@@ -39,8 +54,6 @@ if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role": "assistant", "content": "Hello! I'm Suat's AI assistant. Ask me anything about his experience."}
     ]
-
-import time
 
 def stream_data(text):
     """Yields text word by word with a slight delay to simulate typing."""
