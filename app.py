@@ -7,6 +7,11 @@ import time
 st.set_page_config(page_title="Suat's AI Assistant", page_icon="🤖")
 st.title("🤖 Chat with Suat's AI Assistant")
 
+# Sidebar
+with st.sidebar:
+    st.header("Connect with Me")
+    st.link_button("📅 Book a Call", "https://calendly.com/s-tuncersuat/15min") # Update with your actual Calendly URL
+
 # 2. Simple Authentication System
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -118,8 +123,8 @@ if len(st.session_state.messages) == 1:
             border: 1px solid #4b4b4b;
             background-color: transparent;
             color: #e0e0e0;
-            font-size: 0.01rem;
-            padding: 0.2rem 0rem;
+            font-size: 0.8rem;
+            padding: 0.5rem 1rem;
             transition: all 0.3s ease;
         }
         
@@ -128,27 +133,11 @@ if len(st.session_state.messages) == 1:
             color: #ff4b4b;
             background-color: rgba(255, 75, 75, 0.1);
         }
-
-        /* Position the container at the bottom, just above the chat input */
-        /* We target the last horizontal block in the main container */
-        div[data-testid="stHorizontalBlock"]:last-of-type {
-            position: fixed;
-            bottom: 115px; /* Adjust based on chat input height */
-            left: 0;
-            right: 0;
-            margin: 0 auto;
-            max-width: 700px; /* Match Streamlit's main column width */
-            z-index: 99;
-            padding: 1 1rem;
-            background: transparent;
-        }
-        
-        /* Hide the element decoration/border if any */
-        div[data-testid="stHorizontalBlock"]:last-of-type > div {
-            align-items: center;
-        }
         </style>
     """, unsafe_allow_html=True)
+
+    # Spacer to push buttons to the bottom-ish of the screen
+    st.markdown("<div style='height: 30vh;'></div>", unsafe_allow_html=True)
 
     questions = [
         "What is your experience with Python?",
