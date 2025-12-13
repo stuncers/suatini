@@ -38,6 +38,14 @@ if "messages" not in st.session_state:
         {"role": "assistant", "content": "Hello! I'm Suat's AI assistant. Ask me anything about his experience."}
     ]
 
+import time
+
+def stream_data(text):
+    """Yields text word by word with a slight delay to simulate typing."""
+    for word in text.split(" "):
+        yield word + " "
+        time.sleep(0.02)
+
 def handle_chat(user_prompt):
     """Handles sending the user prompt to n8n and updating the chat history."""
     st.session_state.messages.append({"role": "user", "content": user_prompt})
@@ -72,7 +80,7 @@ def handle_chat(user_prompt):
             bot_answer = f"Connection failed: {str(e)}"
 
     with st.chat_message("assistant"):
-        st.markdown(bot_answer)
+        st.write_stream(stream_data(bot_answer))
     st.session_state.messages.append({"role": "assistant", "content": bot_answer})
     
     # Force a rerun to update the UI immediately (hides buttons, shows new history)
