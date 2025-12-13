@@ -19,17 +19,19 @@ if not st.session_state.authenticated:
     st.write("Please enter the access code provided to you.")
     st.write("Reach out to s.tuncersuat@gmail.com or https://www.linkedin.com/in/suat-tuncer for access code.")
     
-    password = st.text_input("Access Code", type="password")
-    
-    if st.button("Enter"):
-        # Access secrets correctly
-        if password in st.secrets["RECRUITER_KEYS"]:
-            st.session_state.authenticated = True
-            st.session_state.access_code = password
-            st.success("Access Granted! Loading chat...")
-            st.rerun()
-        else:
-            st.error("Invalid Access Code")
+    with st.form("auth_form"):
+        password = st.text_input("Access Code", type="password")
+        submitted = st.form_submit_button("Enter")
+        
+        if submitted:
+            # Access secrets correctly
+            if password in st.secrets["RECRUITER_KEYS"]:
+                st.session_state.authenticated = True
+                st.session_state.access_code = password
+                st.success("Access Granted! Loading chat...")
+                st.rerun()
+            else:
+                st.error("Invalid Access Code")
     st.stop() 
 
 # 3. Chat Interface Setup
