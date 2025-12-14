@@ -1,0 +1,23 @@
+name: Keep Streamlit App Alive
+
+on:
+  schedule:
+    # Run every 4 hours (to beat the 12-hour timeout)
+    - cron: "0 */4 * * *"
+  workflow_dispatch: # Allows you to run it manually if needed
+
+jobs:
+  ping-repo:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Push Empty Commit
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git commit --allow-empty -m "Auto-commit to keep app awake [skip ci]"
+          git push
