@@ -24,7 +24,7 @@ if not st.session_state.authenticated:
     st.markdown("""
     Welcome! I am an AI agent trained on Suat's professional background. 
     I can answer questions about his **resume, technical skills, and projects**.
-    
+    If you would like to schedule a meeting directly, please use the 'Book a Call' button located in the left sidebar.
     *If you are a recruiter or hiring manager, please enter your access code below.*
     
     *Need a code? Reach out to **s.tuncersuat@gmail.com** or [LinkedIn](https://www.linkedin.com/in/suat-tuncer).*
